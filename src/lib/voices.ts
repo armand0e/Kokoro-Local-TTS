@@ -1,4 +1,13 @@
-export const VOICES = Object.freeze({
+export interface VoiceInfo {
+  name: string;
+  language: string;
+  gender: "Male" | "Female";
+  traits?: string;
+  targetQuality?: string;
+  overallGrade?: string;
+}
+
+export const VOICES: Record<string, VoiceInfo> = Object.freeze({
   af_heart: {
     name: "Heart",
     language: "en-us",
@@ -49,21 +58,22 @@ export const VOICES = Object.freeze({
     gender: "Female",
     traits: "🎧",
     targetQuality: "B",
-    overallGrade: "B-",
+    overallGrade: "C",
   },
   af_nova: {
     name: "Nova",
     language: "en-us",
     gender: "Female",
     targetQuality: "B",
-    overallGrade: "C",
+    overallGrade: "B-",
   },
   af_river: {
     name: "River",
     language: "en-us",
     gender: "Female",
-    targetQuality: "C",
-    overallGrade: "D",
+    traits: "🏞️",
+    targetQuality: "B",
+    overallGrade: "C-",
   },
   af_sarah: {
     name: "Sarah",
@@ -77,49 +87,51 @@ export const VOICES = Object.freeze({
     language: "en-us",
     gender: "Female",
     targetQuality: "B",
-    overallGrade: "C-",
+    overallGrade: "C",
   },
   am_adam: {
     name: "Adam",
     language: "en-us",
     gender: "Male",
     targetQuality: "D",
-    overallGrade: "F+",
+    overallGrade: "D",
   },
   am_echo: {
     name: "Echo",
     language: "en-us",
     gender: "Male",
     targetQuality: "C",
-    overallGrade: "D",
+    overallGrade: "D+",
   },
   am_eric: {
     name: "Eric",
     language: "en-us",
     gender: "Male",
-    targetQuality: "C",
-    overallGrade: "D",
+    traits: "⭐",
+    targetQuality: "B",
+    overallGrade: "B-",
   },
   am_fenrir: {
     name: "Fenrir",
     language: "en-us",
     gender: "Male",
+    traits: "🐺",
     targetQuality: "B",
-    overallGrade: "C+",
+    overallGrade: "B-",
   },
   am_liam: {
     name: "Liam",
     language: "en-us",
     gender: "Male",
     targetQuality: "C",
-    overallGrade: "D",
+    overallGrade: "D+",
   },
   am_michael: {
     name: "Michael",
     language: "en-us",
     gender: "Male",
     targetQuality: "B",
-    overallGrade: "C+",
+    overallGrade: "C",
   },
   am_onyx: {
     name: "Onyx",
@@ -139,16 +151,16 @@ export const VOICES = Object.freeze({
     name: "Santa",
     language: "en-us",
     gender: "Male",
+    traits: "🎅",
     targetQuality: "C",
-    overallGrade: "D-",
+    overallGrade: "D",
   },
   bf_emma: {
     name: "Emma",
     language: "en-gb",
     gender: "Female",
-    traits: "🚺",
     targetQuality: "B",
-    overallGrade: "B-",
+    overallGrade: "C+",
   },
   bf_isabella: {
     name: "Isabella",
@@ -162,36 +174,12 @@ export const VOICES = Object.freeze({
     language: "en-gb",
     gender: "Male",
     targetQuality: "B",
-    overallGrade: "C",
+    overallGrade: "C-",
   },
   bm_lewis: {
     name: "Lewis",
     language: "en-gb",
     gender: "Male",
-    targetQuality: "C",
-    overallGrade: "D+",
-  },
-  bf_alice: {
-    name: "Alice",
-    language: "en-gb",
-    gender: "Female",
-    traits: "🚺",
-    targetQuality: "C",
-    overallGrade: "D",
-  },
-  bf_lily: {
-    name: "Lily",
-    language: "en-gb",
-    gender: "Female",
-    traits: "🚺",
-    targetQuality: "C",
-    overallGrade: "D",
-  },
-  bm_daniel: {
-    name: "Daniel",
-    language: "en-gb",
-    gender: "Male",
-    traits: "🚹",
     targetQuality: "C",
     overallGrade: "D",
   },
@@ -199,61 +187,29 @@ export const VOICES = Object.freeze({
     name: "Fable",
     language: "en-gb",
     gender: "Male",
-    traits: "🚹",
     targetQuality: "B",
-    overallGrade: "C",
+    overallGrade: "C-",
   },
 });
 
-const VOICE_DATA_URL = "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main/voices";
+// Voice data cache
+const voiceDataCache: Map<string, Float32Array> = new Map();
 
-/**
- *
- * @param {keyof typeof VOICES} id
- * @returns {Promise<ArrayBufferLike>}
- */
-async function getVoiceFile(id) {
-  const url = `${VOICE_DATA_URL}/${id}.bin`;
-
-  let cache;
-  try {
-    cache = await caches.open("kokoro-voices");
-    const cachedResponse = await cache.match(url);
-    if (cachedResponse) {
-      return await cachedResponse.arrayBuffer();
-    }
-  } catch (e) {
-    console.warn("Unable to open cache", e);
+export async function getVoiceData(voice: string): Promise<Float32Array> {
+  if (voiceDataCache.has(voice)) {
+    return voiceDataCache.get(voice)!;
   }
 
-  // No cache, or cache failed to open. Fetch the file.
+  const url = `https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main/voices/${voice}.bin?download=true`;
   const response = await fetch(url);
-  const buffer = await response.arrayBuffer();
-
-  if (cache) {
-    try {
-      // NOTE: We use `new Response(buffer, ...)` instead of `response.clone()` to handle LFS files
-      await cache.put(
-        url,
-        new Response(buffer, {
-          headers: response.headers,
-        }),
-      );
-    } catch (e) {
-      console.warn("Unable to cache file", e);
-    }
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch voice data for ${voice}: ${response.statusText}`);
   }
-
-  return buffer;
-}
-
-const VOICE_CACHE = new Map();
-export async function getVoiceData(voice) {
-  if (VOICE_CACHE.has(voice)) {
-    return VOICE_CACHE.get(voice);
-  }
-
-  const buffer = new Float32Array(await getVoiceFile(voice));
-  VOICE_CACHE.set(voice, buffer);
-  return buffer;
+  
+  const arrayBuffer = await response.arrayBuffer();
+  const voiceData = new Float32Array(arrayBuffer);
+  
+  voiceDataCache.set(voice, voiceData);
+  return voiceData;
 }

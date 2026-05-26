@@ -1,68 +1,116 @@
-# Streaming-KokoroJS
+# Kokoro TTS Server
 
-## About
-Unlimited text-to-speech using [Kokoro-JS](https://github.com/hexgrad/kokoro), 100% local, 100% open source
-
-## Online Demo (that does not send any user text data to any server.)
-[https://rhulha.github.io/StreamingKokoroJS/](https://rhulha.github.io/StreamingKokoroJS/)
-
-## Overview
-
-Streaming-Kokoro is a web-based text-to-speech application that leverages the Kokoro-82M model to generate high-quality speech audio entirely in the browser. The application runs completely in the browser without requiring any server-side processing or API calls, ensuring privacy and offline functionality.
+A Next.js-based Text-to-Speech server using the Kokoro-82M model with server-side GPU acceleration.
 
 ## Features
 
-- **100% Client-Side Processing**: All text-to-speech conversion happens locally in your browser
-- **WebGPU Acceleration**: Automatically uses WebGPU for faster processing when available, with WASM fallback
-- **Streaming Audio Generation**: Processes text in chunks and streams audio as it's generated
-- **Smart Text Chunking**: Intelligently splits text to maintain natural speech patterns
-- **Multiple Voice Styles**: Supports various voice styles for different languages
-- **Audio Download**: Save generated audio to disk
-- **Fully Open Source**: Every component is open source and freely available
+- **Server-side TTS**: Model loads once on server startup and runs inference on the server
+- **Streaming audio**: Real-time audio streaming via Server-Sent Events
+- **Multiple voices**: 25+ voices with different accents and genders
+- **Download support**: Generate and download complete audio files
+- **Modern UI**: Clean React-based interface with TailwindCSS
 
-## Technical Details
+## Prerequisites
 
-- Uses the Kokoro-82M-v1.0-ONNX model (~300MB, cached after first load)
-- Employs Web Workers for non-blocking UI during speech generation
-- Automatically detects hardware capabilities and selects optimal processing mode:
-  - WebGPU acceleration on compatible browsers/devices
-  - WebAssembly (WASM) fallback on other devices
-- Sample rate: 24kHz for high-quality audio output
+- Node.js 18+ 
+- (Optional) CUDA-compatible GPU for faster inference
 
-## Getting Started
+## Installation
 
-1. Clone this repository
-2. Serve the files using a local web server
-3. Open the application in a modern browser (Chrome/Edge recommended for WebGPU support)
-4. Enter or paste text into the text area
-5. Click "Play" to stream the audio or "Download" to save it to disk
-
-## Local Model
-
-The application can use a local model instead of downloading from HuggingFace. Example:
-
+```bash
+cd next-app
+npm install
 ```
-if (self.location.hostname === "localhost") {
-  env.allowLocalModels = true;
-  model_id = "./my_model/";
+
+## Running the Server
+
+### Development
+```bash
+npm run dev
+```
+
+### Production
+```bash
+npm run build
+npm start
+```
+
+The server will start at `http://localhost:3000`.
+
+## API Endpoints
+
+### GET /api/tts
+Check model status and get available voices.
+
+**Response:**
+```json
+{
+  "ready": true,
+  "voices": { ... },
+  "sampleRate": 24000
 }
 ```
 
-## Model Information
+### POST /api/tts
+Stream TTS audio using Server-Sent Events.
 
-This project uses the [Kokoro-82M-v1.0-ONNX](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX) model from Hugging Face, which provides high-quality text-to-speech capabilities in a relatively compact package suitable for browser-based applications.
+**Request:**
+```json
+{
+  "text": "Hello, world!",
+  "voice": "af_heart",
+  "speed": 1
+}
+```
 
-## Browser Compatibility
+**Response:** SSE stream with audio chunks in base64 format.
 
-- **Recommended**: Chromium-based browsers with WebGPU support (Chrome, Edge, etc.)
-- **Compatible**: Any modern browser with WebAssembly support. (FireFox seems not to work at the moment.)
+### POST /api/tts/download
+Generate a complete WAV file for download.
+
+**Request:**
+```json
+{
+  "text": "Hello, world!",
+  "voice": "af_heart",
+  "speed": 1
+}
+```
+
+**Response:** WAV audio file.
+
+## Architecture
+
+```
+next-app/
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── tts/          # TTS API routes
+│   │   ├── layout.tsx        # Root layout
+│   │   ├── page.tsx          # Main page
+│   │   └── globals.css       # Global styles
+│   ├── components/           # React components
+│   │   ├── TTSClient.tsx     # Main TTS client
+│   │   ├── VoiceSelector.tsx # Voice dropdown
+│   │   ├── ProgressBar.tsx   # Progress indicator
+│   │   └── Icons.tsx         # SVG icons
+│   ├── lib/
+│   │   ├── tts-model.ts      # TTS model singleton
+│   │   ├── voices.ts         # Voice definitions
+│   │   ├── phonemize.ts      # Text normalization
+│   │   └── text-splitter.ts  # Text chunking
+│   └── instrumentation.ts    # Model preloading on startup
+```
+
+## Model
+
+Uses the [Kokoro-82M-v1.0-ONNX](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX) model from Hugging Face.
+
+- **Size**: ~300MB
+- **Sample Rate**: 24kHz
+- **Format**: Mono audio
 
 ## License
 
-This project is open source under the Apache 2 License.
-
-## Acknowledgments
-
-- [Kokoro](https://github.com/hexgrad/kokoro)  is an open-weight TTS model with 82 million parameters.
-- [Hugging Face Transformers.js](https://huggingface.co/docs/transformers.js) for the browser-based ML framework
-- [Kokoro-82M Model](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX) for the TTS capabilities
+MIT
