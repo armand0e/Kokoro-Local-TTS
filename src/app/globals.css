@@ -2,144 +2,269 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Light theme (default) ─── */
 :root {
-  --primary-color: #4361ee;
-  --secondary-color: #3a0ca3;
-  --accent-color: #7209b7;
-  --background-color: #f8f9fa;
-  --text-color: #333;
-  --light-gray: #e9ecef;
-  --dark-gray: #6c757d;
-  --success-color: #4CAF50;
-  --danger-color: #e63946;
+  --surface: #ffffff;
+  --surface-secondary: #f7f7f5;
+  --surface-tertiary: #f0f0ee;
+  --surface-hover: rgba(55, 53, 47, 0.04);
+
+  --border: rgba(55, 53, 47, 0.09);
+  --border-strong: rgba(55, 53, 47, 0.16);
+
+  --text-primary: #37352f;
+  --text-secondary: rgba(55, 53, 47, 0.65);
+  --text-tertiary: rgba(55, 53, 47, 0.4);
+  --text-inverted: #ffffff;
+
+  --accent: #2383e2;
+  --accent-hover: #1b6ec2;
+  --accent-muted: rgba(35, 131, 226, 0.08);
+  --accent-text: #2383e2;
+
+  --sidebar-bg: #f7f7f5;
+  --popout-bg: #ffffff;
 }
 
-html,
-body {
+/* ─── Dark theme ─── */
+.dark {
+  --surface: #191919;
+  --surface-secondary: #202020;
+  --surface-tertiary: #2f2f2f;
+  --surface-hover: rgba(255, 255, 255, 0.055);
+
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  --text-primary: rgba(255, 255, 255, 0.9);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-tertiary: rgba(255, 255, 255, 0.4);
+  --text-inverted: #191919;
+
+  --accent: #529cca;
+  --accent-hover: #6db3df;
+  --accent-muted: rgba(82, 156, 202, 0.12);
+  --accent-text: #6db3df;
+
+  --sidebar-bg: #202020;
+  --popout-bg: #252525;
+}
+
+/* ─── Base resets ─── */
+html, body {
   height: 100%;
 }
 
 body {
-  @apply bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 text-gray-800;
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--surface);
+  color: var(--text-primary);
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
+/* ─── Scrollbar (Notion-style: thin, barely visible) ─── */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 rounded;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full;
+  background: var(--border-strong);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400;
+  background: var(--text-tertiary);
 }
 
-/* Textarea styling */
-textarea {
-  @apply resize-none;
-}
-
-textarea:focus {
+/* ─── Focus ring utility ─── */
+.focus-ring {
   @apply outline-none;
+  transition: box-shadow 0.15s ease;
 }
 
-textarea::selection {
-  @apply bg-primary/20;
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-muted), 0 0 0 4px var(--accent);
 }
 
-/* Button transitions */
-button {
-  @apply transition-all duration-200;
+/* ─── TipTap editor styles ─── */
+.tiptap-editor .ProseMirror {
+  outline: none;
+  min-height: 300px;
+  padding: 0;
 }
 
-button:hover:not(:disabled) {
-  @apply transform -translate-y-0.5;
+.tiptap-editor .ProseMirror p {
+  margin: 0.25em 0;
 }
 
-button:disabled {
-  @apply cursor-not-allowed;
+.tiptap-editor .ProseMirror h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-top: 1.5em;
+  margin-bottom: 0.25em;
+  line-height: 1.3;
 }
 
-/* Range slider styling */
-input[type="range"] {
-  @apply appearance-none bg-transparent;
+.tiptap-editor .ProseMirror h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.25em;
+  margin-bottom: 0.25em;
+  line-height: 1.35;
 }
 
-input[type="range"]::-webkit-slider-track {
-  @apply h-2 rounded-full bg-gray-200;
+.tiptap-editor .ProseMirror h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.25em;
+  line-height: 1.4;
 }
 
-input[type="range"]::-webkit-slider-thumb {
-  @apply appearance-none w-4 h-4 rounded-full bg-primary cursor-pointer shadow-md;
-  margin-top: -4px;
+.tiptap-editor .ProseMirror ul,
+.tiptap-editor .ProseMirror ol {
+  padding-left: 1.5em;
+  margin: 0.25em 0;
 }
 
-input[type="range"]::-webkit-slider-thumb:hover {
-  @apply bg-primary-hover scale-110;
+.tiptap-editor .ProseMirror li {
+  margin: 0.125em 0;
 }
 
-input[type="range"]:disabled::-webkit-slider-thumb {
-  @apply bg-gray-400 cursor-not-allowed;
+.tiptap-editor .ProseMirror blockquote {
+  border-left: 3px solid var(--border-strong);
+  padding-left: 1em;
+  margin: 0.5em 0;
+  color: var(--text-secondary);
 }
 
-/* Select styling */
-select {
-  @apply appearance-none bg-no-repeat;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-position: right 12px center;
-  padding-right: 40px;
+.tiptap-editor .ProseMirror code {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.875em;
+  background: var(--surface-tertiary);
+  border-radius: 3px;
+  padding: 0.15em 0.35em;
 }
 
-/* Progress bar animation */
-.progress-bar-fill {
-  transition: width 0.3s ease;
+.tiptap-editor .ProseMirror pre {
+  background: var(--surface-tertiary);
+  border-radius: 6px;
+  padding: 0.75em 1em;
+  margin: 0.5em 0;
+  overflow-x: auto;
 }
 
-/* Spinning animation */
+.tiptap-editor .ProseMirror pre code {
+  background: none;
+  padding: 0;
+}
+
+.tiptap-editor .ProseMirror hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5em 0;
+}
+
+.tiptap-editor .ProseMirror .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--text-tertiary);
+  pointer-events: none;
+  height: 0;
+}
+
+/* ─── Image block in editor ─── */
+.tiptap-editor .ProseMirror .image-block {
+  margin: 0.75em 0;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.tiptap-editor .ProseMirror .image-block:hover {
+  border-color: var(--accent);
+}
+
+.tiptap-editor .ProseMirror .image-block img {
+  display: block;
+  max-width: 100%;
+  border-radius: 5px 5px 0 0;
+}
+
+/* ─── Selection highlight for playing blocks ─── */
+.block-playing {
+  background: var(--accent-muted);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+/* ─── Animations ─── */
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .animate-spin-slow {
   animation: spin 1.5s linear infinite;
 }
 
-/* Pulse animation for streaming indicator */
 @keyframes pulse-dot {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.5;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-.animate-pulse {
+.animate-pulse-dot {
   animation: pulse-dot 1.5s ease-in-out infinite;
 }
 
-/* Card hover effects */
-.card-hover {
-  @apply transition-all duration-300;
+/* ─── Range slider ─── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  width: 100%;
 }
 
-.card-hover:hover {
-  @apply shadow-xl -translate-y-1;
+input[type="range"]::-webkit-slider-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--surface-tertiary);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  margin-top: -5px;
+  transition: transform 0.1s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+input[type="range"]:disabled::-webkit-slider-thumb {
+  background: var(--text-tertiary);
+  cursor: not-allowed;
+}
+
+/* ─── Utility: transitions on interactive elements ─── */
+button, a, [role="button"] {
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }

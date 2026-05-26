@@ -24,6 +24,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@huggingface/transformers": [
+        "./src/types/transformers.d.ts"
       ]
     },
     "target": "ES2017"

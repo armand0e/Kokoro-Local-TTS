@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Kokoro TTS Server",
-  description: "Server-side Text-to-Speech using Kokoro model with GPU acceleration",
+  title: "Kokoro TTS",
+  description: "Notion-like document editor with built-in text-to-speech",
 };
 
 export default function RootLayout({
@@ -12,15 +12,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link
           rel="icon"
-          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%23009688;stop-opacity:1' /><stop offset='100%25' style='stop-color:%2300BCD4;stop-opacity:1' /></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23grad)' stroke='%23FFF' stroke-width='2'/><rect x='32' y='30' width='10' height='40' rx='2' fill='white' opacity='0.9'/><rect x='47' y='20' width='10' height='60' rx='2' fill='white' opacity='0.9'/><rect x='62' y='35' width='10' height='30' rx='2' fill='white' opacity='0.9'/><path d='M77 35 Q90 50 77 65' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/><path d='M82 25 Q100 50 82 75' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' opacity='0.7'/></svg>"
+          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%232383e2;stop-opacity:1' /><stop offset='100%25' style='stop-color:%23529cca;stop-opacity:1' /></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23grad)'/><polygon points='40,30 40,70 72,50' fill='white' opacity='0.95'/></svg>"
           type="image/svg+xml"
         />
+        {/* Prevent flash of wrong theme */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('kokoro-theme');if(t==='dark'||((!t)&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()`,
+          }}
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
       </head>
-      <body className="antialiased">
+      <body className="antialiased overflow-hidden">
         {children}
       </body>
     </html>

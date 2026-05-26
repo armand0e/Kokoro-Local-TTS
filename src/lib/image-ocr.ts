@@ -3,15 +3,6 @@ import { pipeline, type ImageToTextPipeline } from "@huggingface/transformers";
 const OCR_MODEL_ID = "Xenova/trocr-small-printed";
 
 type OCRPipeline = ImageToTextPipeline;
-type OCRPipelineFactory = (
-  task: "image-to-text",
-  model: string,
-  options: {
-    device: "cpu";
-    dtype: "q8";
-    progress_callback: (progress: { progress?: number; status?: string }) => void;
-  }
-) => Promise<OCRPipeline>;
 
 type OCRState = {
   instance: OCRPipeline | null;
@@ -37,9 +28,8 @@ const getGlobalState = (): OCRState => {
 
 async function loadOCRPipeline(): Promise<OCRPipeline> {
   const state = getGlobalState();
-  const createPipeline = pipeline as unknown as OCRPipelineFactory;
 
-  return createPipeline("image-to-text", OCR_MODEL_ID, {
+  return pipeline<OCRPipeline>("image-to-text", OCR_MODEL_ID, {
     device: "cpu",
     dtype: "q8",
     progress_callback: (progress: { progress?: number; status?: string }) => {
